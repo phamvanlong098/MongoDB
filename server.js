@@ -1,14 +1,43 @@
 const express = require('express');
 const app = express();
-// const port = 3000;
+const port = 3000;
 const bodyParser = require('body-parser')
 const AccountModel = require('./model/accountModel')
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
+const PAGE_SIZE = 2;
+
 app.get('/', (req, res) => {
     res.send('hello')
+})
+
+app.get('/user', (req, res, next) => {
+    let page = req.query.page
+    if(page) {
+        page = parseInt(page)
+        let soTrangBoQua = (page - 1) * PAGE_SIZE
+        AccountModel.find()
+        .skip(soTrangBoQua)
+        .limit(PAGE_SIZE)
+        .then(data => {
+            res.json(data)
+        })
+        .catch(err => {
+            res.status(500).json("Loi server")
+        })
+    }
+    else{
+        AccountModel.find()
+        .then(data=> {
+            res.json(data)
+        })
+        .catch(err => {
+            res.status(500).json("Loi database")
+        })
+        
+    }
 })
 
 app.post('/register', (req, res) => {
@@ -42,6 +71,6 @@ app.post('/signin', (req, res) => {
     .catch(err => res.status(500).json('have error on server'))
 })
 
-app.listen(process.env.PORT, function() {
-    console.log('Listening on port http://localhost:' + process.env.PORT);
+app.listen(port, function() {
+    console.log('Listening on port http://localhost:' + port);
 })
