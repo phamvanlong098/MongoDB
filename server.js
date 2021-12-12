@@ -43,6 +43,10 @@ app.post('/login', (req, res, next) => {
 })
 
 
+app.post('/logout', (req, res, next) => {
+    res.clearCookie('token').redirect(301, '/login')
+})
+
 // app.get('/private', checklogin, (req, res, next) => {
 //     res.send('welcome')
 // })
@@ -100,7 +104,7 @@ function checkManager(req, res, next) {
 }
 
 app.get('/student', checklogin, checkStudent, (req, res, next) => {
-    res.send('student')
+    res.sendFile(path.join(__dirname, 'logout.html'))
 })
 app.get('/teacher', checklogin, checkTeacher, (req, res, next) => {
     res.send('teacher')
