@@ -117,6 +117,3 @@ app.get('/manager', checklogin, checkManager, (req, res, next) => {
 app.listen(port, function() {
     console.log('Listening on port http://localhost:' + port);
 })
-
-
-// commit
