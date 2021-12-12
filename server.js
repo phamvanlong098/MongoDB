@@ -3,72 +3,110 @@ const app = express();
 const port = 3000;
 const bodyParser = require('body-parser')
 const AccountModel = require('./model/accountModel')
+const path = require('path')
+const cookieParser = require('cookie-parser')
+const jwt = require('jsonwebtoken');
 
+app.use(cookieParser())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-const PAGE_SIZE = 2;
 
-app.get('/', (req, res) => {
-    res.send('hello')
+app.get('/', (req, res, next) => {
+    res.redirect('/login')
 })
 
-app.get('/user', (req, res, next) => {
-    let page = req.query.page
-    if(page) {
-        page = parseInt(page)
-        let soTrangBoQua = (page - 1) * PAGE_SIZE
-        AccountModel.find()
-        .skip(soTrangBoQua)
-        .limit(PAGE_SIZE)
-        .then(data => {
-            res.json(data)
-        })
-        .catch(err => {
-            res.status(500).json("Loi server")
-        })
-    }
-    else{
-        AccountModel.find()
-        .then(data=> {
-            res.json(data)
-        })
-        .catch(err => {
-            res.status(500).json("Loi database")
-        })
-        
-    }
+app.get('/login', (req, res, next) => {
+    res.sendFile(path.join(__dirname, '/login.html'))
 })
 
-app.post('/register', (req, res) => {
-    let username = req.body.username
-    let password = req.body.password
-    AccountModel.findOne({username})
+app.post('/login', (req, res, next) => {
+    // res.redirect('/private')
+    const username = req.body.username;
+    const password = req.body.password;
+    AccountModel.findOne({username, password})
     .then(data =>{
         if(data) {
-            res.json('User nay da ton tai')
+            const token = jwt.sign({_id: data._id}, 'mk', {expiresIn: "15m"})
+            res
+            .status(201)
+            .cookie('token', token)
+            .redirect(301, '/student')
         }
         else {
-            return AccountModel.create({username, password})
+            res.status(400).send("username or password incorrect")
         }
     })
-    .then (data => res.json('Tao tai khoan thanh cong'))
-    .catch(err => res.send('have error'))
+    .catch(err => {
+        res.status(500).send(err);
+    })
 })
 
-app.post('/signin', (req, res) => {
-    let username = req.body.username
-    let password = req.body.password
-    AccountModel.findOne({username, password})
-    .then(data => {
-        if(data) {
-            res.json('Dang nhap thanh cong')
-        }
-        else {
-            res.status(400).json('Tai khoan hoac mat khau khong chinh xac')
-        }
-    })
-    .catch(err => res.status(500).json('have error on server'))
+
+// app.get('/private', checklogin, (req, res, next) => {
+//     res.send('welcome')
+// })
+
+function checklogin(req, res, next) {
+    try {
+        const token = req.cookies.token;
+        const _id = jwt.verify(token, 'mk');
+
+        AccountModel.findOne({ _id })
+            .then(data => {
+                if (data) {
+                    req.data = data;
+                    console.log(req.data);
+                    next();
+                }
+                else {
+                    res.status(500).send('login data invalid');
+                }
+            })
+            .catch(err => {
+                res.status(500).send(err);
+            });
+    } catch (err) {
+        res.status(400).redirect('/login');
+    }
+}
+
+function checkStudent(req, res, next) {
+    const role = req.data.role;
+    if(role === 'student' || role === 'teacher' || role === 'manager') {
+        next()
+    }
+    else{
+        res.send('NO PERMITTION')
+    }
+}
+function checkTeacher(req, res, next) {
+    const role = req.data.role;
+    if(role === 'teacher' || role === 'manager') {
+        next()
+    }
+    else{
+        res.send('NO PERMITTION')
+    }
+}
+function checkManager(req, res, next) {
+    const role = req.data.role;
+    if(role === 'manager') {
+        next()
+    }
+    else{
+        res.send('NO PERMITTION')
+    }
+}
+
+app.get('/student', checklogin, checkStudent, (req, res, next) => {
+    res.send('student')
+})
+app.get('/teacher', checklogin, checkTeacher, (req, res, next) => {
+    res.send('teacher')
+})
+app.get('/manager', checklogin, checkManager, (req, res, next) => {
+    res.send('manager')
 })
 
 
