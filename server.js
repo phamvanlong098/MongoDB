@@ -27,7 +27,7 @@ app.post('/login', (req, res, next) => {
     AccountModel.findOne({username, password})
     .then(data =>{
         if(data) {
-            const token = jwt.sign({_id: data._id}, 'mk', {expiresIn: "15m"})
+            const token = jwt.sign({_id: data._id}, 'mk', {expiresIn: "30m"})
             res
             .status(201)
             .cookie('token', token)
@@ -60,7 +60,6 @@ function checklogin(req, res, next) {
             .then(data => {
                 if (data) {
                     req.data = data;
-                    console.log(req.data);
                     next();
                 }
                 else {
