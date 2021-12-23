@@ -1,0 +1,2 @@
+mainedit: abcdef
+Longedit: ok
