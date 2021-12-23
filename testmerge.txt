@@ -1,11 +1,3 @@
 con chau delete: 1
 
-<<<<<<< HEAD
-
-parentedit: 2
-parentedit: 3
-cha ong edit: 0k
-cha ong edit ok;
-=======
 con chau edit: ok
->>>>>>> main
