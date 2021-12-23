@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 longedit: 1
 parent deletes: 21
 parentedit: 1
@@ -5,3 +6,5 @@ parentedit: 1
 
 cha ong edit: 0k
 cha ong edit: 0k
+=======
+>>>>>>> main
