@@ -7,3 +7,5 @@ Longedit: 4
 
 parentedit: 2
 parentedit: 3
+cha ong edit: 0k
+cha ong edit ok;
